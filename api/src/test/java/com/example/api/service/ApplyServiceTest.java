@@ -56,6 +56,8 @@ class ApplyServiceTest {
 
         latch.await();
 
+        Thread.sleep(10000);  //컨슈머에서 작업 처리하는 시간이 필요
+
         long count = couponRepository.count();
 
         assertThat(count).isEqualTo(100);
