@@ -34,9 +34,6 @@ class ApplyServiceTest {
 
 
 
-    /**
-     * redis를 사용하여 lazy
-    * */
     @Test
     void 여러명응모() throws InterruptedException {
         int therdCount =1000;
@@ -61,6 +58,32 @@ class ApplyServiceTest {
         long count = couponRepository.count();
 
         assertThat(count).isEqualTo(100);
+    }
 
+
+    @Test
+    void 힌명당_한개만_응모가능() throws InterruptedException {
+        int therdCount =1000;
+        ExecutorService executorService = Executors.newFixedThreadPool(32);
+
+        CountDownLatch latch = new CountDownLatch(therdCount);
+        for(int i =0; i<therdCount;i++){
+            long userId = i;
+            executorService.submit(() ->{
+                try {
+                    applyService.apply(1L);
+                }finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+
+        Thread.sleep(10000);  //컨슈머에서 작업 처리하는 시간이 필요
+
+        long count = couponRepository.count();
+
+        assertThat(count).isEqualTo(1);
     }
 }
